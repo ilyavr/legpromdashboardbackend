@@ -49,10 +49,14 @@ def get_fabric_companies():
         with connection.cursor() as cursor:
             # SQL запрос для получения информации о компаниях по типам тканей
             sql = """
-            SELECT sv.name AS fabric_name, COUNT(cv.id_vid_tkani) AS company_count
-            FROM cs_vid_tkani cv
-            INNER JOIN spr_vid_tkani sv ON cv.id_vid_tkani = sv.id
-            GROUP BY sv.name
+                SELECT sv.name AS fabric_name, 
+                    COUNT(cv.id_vid_tkani) AS company_count,
+                    FLOOR(AVG(DATEDIFF(cc.data_close, cc.data_reg)) / 30) AS avg_lifespan
+                FROM cs_vid_tkani cv
+                INNER JOIN spr_vid_tkani sv ON cv.id_vid_tkani = sv.id
+                INNER JOIN c_address ca ON cv.id = ca.id
+                INNER JOIN c_company cc ON ca.id = cc.id
+                GROUP BY sv.name
             """
             # Выполнение запроса
             cursor.execute(sql)
